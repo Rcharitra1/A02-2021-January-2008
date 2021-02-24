@@ -123,7 +123,7 @@
                                 <a class="dropdown-item"
                                         href="~/SamplePages/ManagePlaylist.aspx"
                                         style="color:black" runat="server">
-                                   Manage Playlists</a>
+                                  OLTP Manage Playlists</a>
                             </div>
                          </li>
                          <li class="nav-item">
