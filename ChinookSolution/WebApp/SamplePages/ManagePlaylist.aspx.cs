@@ -57,7 +57,23 @@ namespace WebApp.SamplePages
         protected void AlbumFetch_Click(object sender, EventArgs e)
         {
 
-                //code to go here
+            TracksBy.Text = "Album";
+            //The Hidden field content access is .Value Not .Text
+            if (string.IsNullOrEmpty(AlbumTitle.Text))
+            {
+                MessageUserControl.ShowInfo("You did not supply an album name");
+                SearchArg.Value = "xdcxe";
+            }
+            else
+            {
+
+                SearchArg.Value = AlbumTitle.Text;
+
+            }
+            //to force the re-execution of an ODS attached to a display control
+            //rebind the display control
+            TracksSelectionList.DataBind();
+
 
         }
 
