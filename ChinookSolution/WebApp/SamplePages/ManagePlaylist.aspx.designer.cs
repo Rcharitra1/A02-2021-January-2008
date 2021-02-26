@@ -129,7 +129,7 @@ namespace WebApp.SamplePages
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label SearchArg;
+        protected global::System.Web.UI.WebControls.HiddenField SearchArg;
 
         /// <summary>
         /// TracksSelectionList control.
@@ -213,12 +213,12 @@ namespace WebApp.SamplePages
         protected global::System.Web.UI.WebControls.ObjectDataSource GenreDDLODS;
 
         /// <summary>
-        /// TrackSelectionListODS control.
+        /// TracksSelectionListODS control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ObjectDataSource TrackSelectionListODS;
+        protected global::System.Web.UI.WebControls.ObjectDataSource TracksSelectionListODS;
     }
 }

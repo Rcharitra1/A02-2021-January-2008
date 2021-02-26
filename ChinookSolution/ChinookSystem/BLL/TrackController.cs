@@ -53,8 +53,19 @@ namespace ChinookSystem.BLL
             using (var context = new ChinookSystemContext())
             {
                 List<TrackList> results = null;
-
-               //code to go here
+                results = context.Tracks.Where(x => x.Album.Artist.Name.Contains(arg))
+                  .Select(x => new TrackList
+                  {
+                      TrackID = x.TrackId,
+                      Name = x.Name,
+                      Title = x.Album.Title,
+                      ArtistName = x.Album.Artist.Name,
+                      GenreName = x.Genre.Name,
+                      Composer = x.Composer,
+                      Milliseconds = x.Milliseconds,
+                      Bytes = x.Bytes,
+                      UnitPrice = x.UnitPrice
+                  }).ToList();
 
                 return results;
             }
