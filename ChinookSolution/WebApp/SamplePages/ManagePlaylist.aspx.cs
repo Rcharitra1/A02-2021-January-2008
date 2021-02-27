@@ -50,7 +50,16 @@ namespace WebApp.SamplePages
         protected void GenreFetch_Click(object sender, EventArgs e)
         {
 
-                //code to go here
+            //code to go here
+
+            TracksBy.Text = "Genre";
+            if(GenreDDL.SelectedIndex<=-1)
+            {
+                MessageUserControl.ShowInfo("Pls select a genre to begin");
+            }else
+            {
+                SearchArg.Value = GenreDDL.SelectedValue;
+            }
 
         }
 

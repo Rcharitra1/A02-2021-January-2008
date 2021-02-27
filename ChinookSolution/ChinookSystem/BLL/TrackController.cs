@@ -86,7 +86,12 @@ namespace ChinookSystem.BLL
                 //      }).ToList();
                 //}
 
-                results = context.Tracks.Where(x => tracksby.Equals("Artist") ? x.Album.Artist.Name.Contains(arg) : x.Album.Title.Contains(arg))
+                int argInt=0;
+                if (tracksby.Equals("Genre"))
+                {
+                    argInt = int.Parse(arg);
+                }
+                results = context.Tracks.Where(x => tracksby.Equals("Artist") ? x.Album.Artist.Name.Contains(arg) : (tracksby.Equals("Genre") ? (x.GenreId == argInt) : x.Album.Title.Contains(arg)))
                   .Select(x => new TrackList
                   {
                       TrackID = x.TrackId,
