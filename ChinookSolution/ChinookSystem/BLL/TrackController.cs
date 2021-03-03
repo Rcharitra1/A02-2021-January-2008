@@ -86,12 +86,27 @@ namespace ChinookSystem.BLL
                 //      }).ToList();
                 //}
 
-                int argInt=0;
-                if (tracksby.Equals("Genre"))
-                {
-                    argInt = int.Parse(arg);
-                }
-                results = context.Tracks.Where(x => tracksby.Equals("Artist") ? x.Album.Artist.Name.Contains(arg) : (tracksby.Equals("Genre") ? (x.GenreId == argInt) : x.Album.Title.Contains(arg)))
+
+
+                //results = context.Tracks.Where(x => tracksby.Equals("Artist") ? x.Album.Artist.Name.Contains(arg) : (tracksby.Equals("Genre") ? (x.GenreId.ToString() == arg) : x.Album.Title.Contains(arg)))
+                //  .Select(x => new TrackList
+                //  {
+                //      TrackID = x.TrackId,
+                //      Name = x.Name,
+                //      Title = x.Album.Title,
+                //      ArtistName = x.Album.Artist.Name,
+                //      GenreName = x.Genre.Name,
+                //      Composer = x.Composer,
+                //      Milliseconds = x.Milliseconds,
+                //      Bytes = x.Bytes,
+                //      UnitPrice = x.UnitPrice
+                //  }).ToList();
+
+                //return results;
+
+
+
+                results = context.Tracks.Where(x => tracksby.Equals("Artist") ? x.Album.Artist.Name.Contains(arg) : (tracksby.Equals("Genre") ? (x.Genre.Name.Equals(arg)) : x.Album.Title.Contains(arg)))
                   .Select(x => new TrackList
                   {
                       TrackID = x.TrackId,

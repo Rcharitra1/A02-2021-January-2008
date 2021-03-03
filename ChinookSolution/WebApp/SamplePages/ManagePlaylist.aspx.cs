@@ -53,13 +53,17 @@ namespace WebApp.SamplePages
             //code to go here
 
             TracksBy.Text = "Genre";
-            if(GenreDDL.SelectedIndex<=-1)
-            {
-                MessageUserControl.ShowInfo("Pls select a genre to begin");
-            }else
-            {
-                SearchArg.Value = GenreDDL.SelectedValue;
-            }
+
+            //if(GenreDDL.SelectedIndex<=-1)
+            //{
+            //    MessageUserControl.ShowInfo("Pls select a genre to begin");
+            //}else
+            //{
+            //    SearchArg.Value = GenreDDL.SelectedValue;
+            //}
+
+            SearchArg.Value = GenreDDL.SelectedItem.Text;            
+            TracksSelectionList.DataBind();
 
         }
 
@@ -88,7 +92,26 @@ namespace WebApp.SamplePages
 
         protected void PlayListFetch_Click(object sender, EventArgs e)
         {
-            //code to go here
+            //username is coming from the system via security
+            //since security has yet to be installed, a defualt will be setup for the username value
+
+            string username = "HansenB";
+            if(string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Playlist Search", "No playlist name was supplied");
+
+            }
+            else
+            {
+                MessageUserControl.TryRun(() =>
+                {
+                    PlaylistTracksController sysmgr = new PlaylistTracksController();
+                    List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
+                    PlayList.DataSource = info;
+                    PlayList.DataBind();
+                }, "Playlist search", "view the requested playlist below");
+                
+            }
  
         }
 
