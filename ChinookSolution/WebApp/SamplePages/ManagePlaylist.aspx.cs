@@ -106,13 +106,18 @@ namespace WebApp.SamplePages
                 MessageUserControl.TryRun(() =>
                 {
                     PlaylistTracksController sysmgr = new PlaylistTracksController();
-                    List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
-                    PlayList.DataSource = info;
-                    PlayList.DataBind();
+                    RefreshPlayList(sysmgr, username);
                 }, "Playlist search", "view the requested playlist below");
                 
             }
  
+        }
+
+        protected void RefreshPlayList(PlaylistTracksController sysmgr, string username)
+        {
+            List<UserPlaylistTrack> info = sysmgr.List_TracksForPlaylist(PlaylistName.Text, username);
+            PlayList.DataSource = info;
+            PlayList.DataBind();
         }
 
         protected void MoveDown_Click(object sender, EventArgs e)
@@ -143,7 +148,28 @@ namespace WebApp.SamplePages
         protected void TracksSelectionList_ItemCommand(object sender, 
             ListViewCommandEventArgs e)
         {
-            //code to go here
+            string username = "HansenB";
+            //until security is implemented
+            //form event validation: presence
+            if(string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Missing data", "Enter a playlist name");
+            }
+            else
+            {
+                MessageUserControl.TryRun(() =>
+                {
+                //logic for your coding block
+                PlaylistTracksController sysmgr = new PlaylistTracksController();
+                    //access a specific field on the selected ListView row
+                string song = (e.Item.FindControl("NameLabel") as Label).Text;
+                    sysmgr.Add_TrackToPLaylist(PlaylistName.Text, username,
+                        int.Parse(e.CommandArgument.ToString()),song
+                        );
+                    RefreshPlayList(sysmgr, username);
+                   
+                }, "Add Track to Playlist", "Track successfully added to the playlist");
+            }
             
         }
 
