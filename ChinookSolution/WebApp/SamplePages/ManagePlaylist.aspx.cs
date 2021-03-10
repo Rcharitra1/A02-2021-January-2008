@@ -123,26 +123,250 @@ namespace WebApp.SamplePages
         protected void MoveDown_Click(object sender, EventArgs e)
         {
             //code to go here
- 
+
+
+
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Missing Data", "Enter a playlist name");
+            }
+            else
+            {
+                MoveTrackItem moveTrack = new MoveTrackItem();
+                if (PlayList.Rows.Count == 0)
+                {
+                    MessageUserControl.ShowInfo("Track movement", "You must a have a playlist for movement");
+                }
+                else
+                {
+                    ;
+
+                    int rowsSelected = 0;
+
+                    CheckBox trackSelection = null;
+
+                    //treverse the grid view control PlayList
+                    //you could do the same code using foreach()
+
+
+
+
+                    foreach (GridViewRow row in PlayList.Rows)
+                    {
+                        trackSelection = row.FindControl("Selected") as CheckBox;
+                        if (trackSelection.Checked)
+                        {
+                            rowsSelected++;
+                            moveTrack.TrackId = int.Parse((trackSelection.FindControl("TrackID") as Label).Text);
+
+                            moveTrack.TrackNumber = int.Parse((trackSelection.FindControl("TrackNumber") as Label).Text);
+
+
+                        }
+                    }
+
+                    //was a single song selected
+
+                    switch (rowsSelected)
+                    {
+                        case 0:
+                            {
+                                MessageUserControl.ShowInfo("Track movement Concern", "You must select one song to remove");
+                                break;
+
+                            }
+
+                        case 1:
+                            {
+                                if(moveTrack.TrackNumber ==PlayList.Rows.Count)
+                                {
+                                    MessageUserControl.ShowInfo("Track Movement concern", "Track selected already at the bottom of your playlist");
+                                }else
+                                {
+                                    moveTrack.Direction = "down";
+
+                                    MoveTrack(moveTrack);
+                                }
+                                
+
+                                break;
+                            }
+
+                        default:
+                            {
+                                MessageUserControl.ShowInfo("Track movement Concern", "You must  select at only one song to remove");
+                                break;
+                            }
+                    }
+
+
+                }
+            }
+
+
         }
 
         protected void MoveUp_Click(object sender, EventArgs e)
         {
             //code to go here
- 
+
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Missing Data", "Enter a playlist name");
+            }
+            else
+            {
+                MoveTrackItem moveTrack = new MoveTrackItem();
+                if (PlayList.Rows.Count == 0)
+                {
+                    MessageUserControl.ShowInfo("Track movement", "You must a have a playlist for movement");
+                }
+                else
+                {
+                    ;
+
+                    int rowsSelected = 0;
+
+                    CheckBox trackSelection = null;
+
+                    //treverse the grid view control PlayList
+                    //you could do the same code using foreach()
+
+
+
+
+                    foreach (GridViewRow row in PlayList.Rows)
+                    {
+                        trackSelection = row.FindControl("Selected") as CheckBox;
+                        if (trackSelection.Checked)
+                        {
+                            rowsSelected++;
+                            moveTrack.TrackId = int.Parse((trackSelection.FindControl("TrackID") as Label).Text);
+
+                            moveTrack.TrackNumber = int.Parse((trackSelection.FindControl("TrackNumber") as Label).Text);
+
+
+                        }
+                    }
+
+                    //was a single song selected
+
+                    switch (rowsSelected)
+                    {
+                        case 0:
+                            {
+                                MessageUserControl.ShowInfo("Track movement Concern", "You must select one song to remove");
+                                break;
+
+                            }
+
+                        case 1:
+                            {
+                                if (moveTrack.TrackNumber == 1)
+                                {
+                                    MessageUserControl.ShowInfo("Track Movement concern", "Track selected already at the top of your playlist");
+                                }
+                                else
+                                {
+                                    moveTrack.Direction = "up";
+
+                                    MoveTrack(moveTrack);
+                                }
+
+
+                                break;
+                            }
+
+                        default:
+                            {
+                                MessageUserControl.ShowInfo("Track movement Concern", "You must  select at only one song to remove");
+                                break;
+                            }
+                    }
+
+
+                }
+            }
+
         }
 
-        protected void MoveTrack(int trackid, int tracknumber, string direction)
+        protected void MoveTrack(MoveTrackItem moveTrack)
         {
             //call BLL to move track
- 
+            string username = "HansenB";
+            moveTrack.UserName = username;
+            moveTrack.PlaylistName = PlaylistName.Text;
+
+            MessageUserControl.TryRun(() =>
+            {
+                PlaylistTracksController sysmgr = new PlaylistTracksController();
+
+                sysmgr.MoveTrack(moveTrack);
+                RefreshPlayList(sysmgr, username);
+            }, "Track Movement", "Track moved successfully");
+
         }
 
 
         protected void DeleteTrack_Click(object sender, EventArgs e)
         {
             //code to go here
- 
+
+            string username = "HansenB";
+
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Missing Data", "Enter a playlist name");
+            }
+            else
+            {
+                if (PlayList.Rows.Count == 0)
+                {
+                    MessageUserControl.ShowInfo("Track Removal", "You must a have a playlist");
+                }
+                else
+                {
+                    List<int> trackids = new List<int>();
+
+                    int rowsSelected = 0;
+
+                    CheckBox trackSelection = null;
+
+                    //treverse the grid view control PlayList
+                    //you could do the same code using foreach()
+
+
+
+
+                    foreach (GridViewRow row in PlayList.Rows)
+                    {
+                        trackSelection = row.FindControl("Selected") as CheckBox;
+                        if (trackSelection.Checked)
+                        {
+                            rowsSelected++;
+                            trackids.Add(int.Parse((row.FindControl("TrackId") as Label).Text));
+                        }
+                    }
+
+
+                    if (rowsSelected == 0)
+                    {
+                        MessageUserControl.ShowInfo("Delete Concern", "You must select at least on song to remove");
+                    }
+                    else
+                    {
+                        MessageUserControl.TryRun(() =>
+                        {
+                            var sysmgr = new PlaylistTracksController();
+
+                            sysmgr.DeleteTracks(username, PlaylistName.Text, trackids);
+                            RefreshPlayList(sysmgr, username);
+                        }, "Track Removal", "Record(s) successfully deleted");
+                    }
+
+                }
+            }
+
         }
 
         protected void TracksSelectionList_ItemCommand(object sender, 

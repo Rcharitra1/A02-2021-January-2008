@@ -14,6 +14,7 @@ using FreeCode.Exceptions;
 
 namespace ChinookSystem.BLL
 {
+
     public class PlaylistTracksController
     {
         //class level variable that will hold multiple strings, each representing an error message. 
@@ -26,87 +27,156 @@ namespace ChinookSystem.BLL
             using (var context = new ChinookSystemContext())
             {
 
-                var results = context.PlaylistTracks.Where(x => x.Playlist.Name.Equals(playlistname) && x.Playlist.UserName.Equals(username)).OrderBy(x=> x.TrackNumber).Select(x=> new UserPlaylistTrack
+                var results = context.PlaylistTracks.Where(x => x.Playlist.Name.Equals(playlistname) && x.Playlist.UserName.Equals(username)).OrderBy(x => x.TrackNumber).Select(x => new UserPlaylistTrack
                 {
-                        TrackID = x.TrackId,
-                        TrackNumber = x.TrackNumber,
-                        TrackName = x.Track.Name,
-                        Milliseconds = x.Track.Milliseconds,
-                        UnitPrice = x.Track.UnitPrice
+                    TrackID = x.TrackId,
+                    TrackNumber = x.TrackNumber,
+                    TrackName = x.Track.Name,
+                    Milliseconds = x.Track.Milliseconds,
+                    UnitPrice = x.Track.UnitPrice
                 }).ToList();
 
                 return results;
             }
         }//eom
 
-        public void Add_TrackToPLaylist(string playlistname, string username, int trackid, string song)
+        public void Add_TrackToPLaylist(string playlistname, string username, int trackid,
+                                        string song)
         {
-            Playlist playlistExist=null;
-            PlaylistTrack playlisttrackExist=null;
-            int trackNumber=0;
+            Playlist playlistExist = null;
+            PlaylistTrack playlisttrackExist = null;
+            int tracknumber = 0;
             using (var context = new ChinookSystemContext())
             {
-                //this class is in what is called Business logic layer
-                //Business logic is the rules of your business
-                //Business logic ensures that rules and data are what is expected 
+                //this class is in what is called the Business Logic Layer
+                //Business Logic is the rules of your business
+                //Business Logic ensures that rules and data are what is expected
                 //Rules:
-                //      rule: a track can only exist once on a playlist
-                //      rule: playlist names can only be used once for a user, different users may have the same playlist name
-                //      rule: each track on a playlist is assigned a continious track number
-                //The BLL methos should alos ensure that data exists for the processing of the transaction
-
-                if(string.IsNullOrEmpty(playlistname))
+                //  rule: a track can only exist once on a playlist
+                //  rule: playlist names can only be used once for a user, different users
+                //        many have the same playlist name
+                //  rule: each track on a playlist is assigned a continious
+                //        track number
+                //
+                //The BLL method should also ensure that data exists for
+                //      the processing of the transaction
+                if (string.IsNullOrEmpty(playlistname))
                 {
                     //there is a data error
                     //setting up an error message
-                    //brokenRules.Add(new BusinessRuleException<datatype>("my message", //nameof("fieldnameinerror"), fieldnameinerror));
-                    brokenRules.Add(new BusinessRuleException<string>("playlist name is missing, Unable to add track", "Playlist Name", playlistname));
+                    brokenRules.Add(new BusinessRuleException<string>("Playlist name is missing. Unable to add track",
+                                "Playlist Name", playlistname));
                 }
-                if(string.IsNullOrEmpty(username))
+                if (string.IsNullOrEmpty(username))
                 {
-                    brokenRules.Add(new BusinessRuleException<string>("username is missing, Unable to add a track", "User Name", username));
+                    //there is a data error
+                    //setting up an error message
+                    brokenRules.Add(new BusinessRuleException<string>("User name is missing. Unable to add track",
+                                "User Name", username));
                 }
-                if (brokenRules.Count == 0)
+
+                //does the playlist already exist
+                playlistExist = (from x in context.Playlists
+                                 where x.Name.Equals(playlistname) &&
+                                         x.UserName.Equals(username)
+                                 select x).FirstOrDefault();
+                if (playlistExist == null)
                 {
-                    //does the playlist already exist
-                    playlistExist = context.Playlists.Where(x => x.Name.Equals(playlistname) && x.UserName.Equals(username)).FirstOrDefault();
-                    if(playlistExist == null)
+                    //new playlist
+                    //tasks:
+                    //  create a new instance of the playlist class
+                    //  load the instance with data
+                    //  stage the add of the new instance
+                    //  set the tracknumber to 1
+                    playlistExist = new Playlist()
                     {
-                        //new playlist
-                        //task:
-                        //  Create a new instance of the playlist class
-                        //  Load the instance with data
-                        //  Set the track number to 1
-
-                        playlistExist = new Playlist() 
-                                {
-                                    Name = playlistname,
-                                    UserName= username  
-                                };
-                        context.Playlists.Add(playlistExist);
-                        trackNumber = 1;
-                    }
-                    else
-                    {
-                        //existing playlist
-                        //task:
-                        //  Does the track already exists on the playlist? If so, error
-                        //  If not, find the highest current trackNumber, increment by 1
-
-                        
-                    }
+                        Name = playlistname,
+                        UserName = username
+                    };
+                    context.Playlists.Add(playlistExist); //parent is STAGED, in memory
+                    tracknumber = 1;
                 }
                 else
                 {
-                    
+                    //existing playlist
+                    //tasks:
+                    //  does the track already exist on the playlist? if so, error
+                    //  if not, find the highest current tracknumber, increment by 1 (rule)
+                    playlisttrackExist = (from x in context.PlaylistTracks
+                                          where x.Playlist.Name.Equals(playlistname) &&
+                                                  x.Playlist.UserName.Equals(username) &&
+                                                  x.TrackId == trackid
+                                          select x).FirstOrDefault();
+                    if (playlisttrackExist == null)
+                    {
+                        //track does not exist on the desired playlist
+                        tracknumber = (from x in context.PlaylistTracks
+                                       where x.Playlist.Name.Equals(playlistname) &&
+                                                   x.Playlist.UserName.Equals(username)
+                                       select x.TrackNumber).Count();
+                        tracknumber++;
+                    }
+                    else
+                    {
+                        //business rule broken. track DOES exist already on the desired
+                        //  playlist
+                        brokenRules.Add(new BusinessRuleException<string>("Track already on playlist",
+                               nameof(song), song));
+                    }
                 }
+                //add the track to the playlist in PlaylistTracks
+                //create an instance
+                playlisttrackExist = new PlaylistTrack();
+                //load the instance
+                playlisttrackExist.TrackId = trackid;
+                playlisttrackExist.TrackNumber = tracknumber;
 
-                
+                //add the instance
+                //?????????????
+                //What is the playlist id
+                //if the playlist exists then we know the id
+                //BUT if the playlist is NEW, we DO NOT know the id
 
-             
+                //in one case the id is known BUT in the second case
+                //  where the new record is ONLY STAGED, NO primary key
+                //  value has been generated yet. <-- problem
+                //if you access the new playlist record the pkey would be 0
+                //  (default numeric value)
+
+                //the solution to BOTH of these scenarios is to use
+                //      navigational properties during the ACTUAL .Add commong
+                //      for the new playlisttrack record
+                //the entityframework will, on your behave, ensure that the
+                //      adding of records to the database will be done in te
+                //      appropriate order AND will add the missing compound pkey
+                //      value (PlaylistId) to the new playlisttrack record
+
+                //NOT LIKE THIS !!!!!!!! THIS IS WRONG!!!!!!!
+                //context.PlaylistTracks.Add(playlisttrackExist);
+
+                //INSTEAD, do the STAGING using the parent.navproperty.Add(xxxx);
+                playlistExist.PlaylistTracks.Add(playlisttrackExist);
+
+                //do the commit
+                //check to see if ANY business rule exceptions occured
+                //
+                if (brokenRules.Count() > 0)
+                {
+                    //at least one error was recorded during the processing of the
+                    //  transaction
+                    throw new BusinessRuleCollectionException("Add Playlist Track Concerns:", brokenRules);
+                }
+                else
+                {
+                    //COMMIT THE TRANSACTION
+                    //ALL the staged records will be sent to sql for processing
+                    //the transaction is complete
+                    //NOTE: a transaction has ONE AND ONLY ONE .SaveChanges()
+                    context.SaveChanges();
+                }
             }
         }//eom
-        public void MoveTrack(string username, string playlistname, int trackid, int tracknumber, string direction)
+        public void MoveTrack(MoveTrackItem moveTrack)
         {
             using (var context = new ChinookSystemContext())
             {
@@ -118,11 +188,86 @@ namespace ChinookSystem.BLL
 
         public void DeleteTracks(string username, string playlistname, List<int> trackstodelete)
         {
+            Playlist playlistExist = null;
+            //PlaylistTrack playlisttrackExist = null;
+            int trackNumber = 0;
             using (var context = new ChinookSystemContext())
             {
-               //code to go here
+                //code to go here
+
+                if (string.IsNullOrEmpty(playlistname))
+                {
+                    //there is a data error
+                    //setting up an error message
+                    //brokenRules.Add(new BusinessRuleException<datatype>("my message", //nameof("fieldnameinerror"), fieldnameinerror));
+                    brokenRules.Add(new BusinessRuleException<string>("playlist name is missing, Unable to add track", "Playlist Name", playlistname));
+                }
+                if (string.IsNullOrEmpty(username))
+                {
+                    brokenRules.Add(new BusinessRuleException<string>("username is missing, Unable to add a track", "User Name", username));
+                }
+                if (trackstodelete.Count == 0)
+                {
+                    brokenRules.Add(new BusinessRuleException<int>("No tracks we selected. Unable to remove track(s)", "Track list count", 0));
+                }
+
+                playlistExist = context.Playlists.Where(x => x.Name.Equals(playlistname) && x.UserName.Equals(username)).FirstOrDefault();
+
+                if (playlistExist == null)
+                {
+                    brokenRules.Add(new BusinessRuleException<string>("playlist does not exist", nameof(playlistname), playlistname));
+                }
+                else
+                {
+                    //list of all tracks to be kept
+
+                    var trackskept = context.PlaylistTracks.Where(x => x.Playlist.UserName.Equals(username) && x.Playlist.Name.Equals(trackNumber) && !trackstodelete.Any(tod => tod == x.TrackId)).OrderBy(x => x.TrackNumber).Select(x => x).ToList();
+
+                    //remove the desired tracks
+
+                    PlaylistTrack item = null;
+                    foreach (var deleteRecord in trackstodelete)
+                    {
+                        item = context.PlaylistTracks.Where(x => x.Playlist.UserName.Equals(username) && x.Playlist.Name.Equals(trackNumber) && x.TrackId == deleteRecord).FirstOrDefault();
 
 
+                        //delete
+                        //stage (parent.navproperty.remove)
+                        if (item != null)
+                        {
+                            playlistExist.PlaylistTracks.Remove(item);
+                        }
+
+                    }
+
+
+
+                    //re-sequence the list
+                    //option a) use a list and update the records of the list
+                    //option b) to delete all children records and re add onl the necessary kept records
+
+                    //Within this example, you'll see an update specific columns of a records(option a)
+
+                    trackNumber = 1;
+
+                    foreach (var track in trackskept)
+                    {
+                        track.TrackNumber = trackNumber;
+                        //stage a single field to be updated 
+                        context.Entry(track).Property(nameof(PlaylistTrack.TrackNumber)).IsModified = true;
+                        trackNumber++;
+                    }
+                }
+                //commit?
+                if (brokenRules.Count > 0)
+                {
+                    throw new BusinessRuleCollectionException("Track Removal concerns: ", brokenRules);
+
+                }
+                else
+                {
+                    context.SaveChanges();
+                }
             }
         }//eom
     }
