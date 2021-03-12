@@ -43,6 +43,9 @@
     <Reference Include="FreeCode.Exceptions, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FreeCode.Exceptions.0.1.1\lib\netstandard2.0\FreeCode.Exceptions.dll</HintPath>
     </Reference>
+    <Reference Include="FreeCode.WebApp, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FreeCode.WebApp.0.2.1.0\lib\net472\FreeCode.WebApp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -91,7 +94,9 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="UserControls\MessageUserControl.ascx" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
